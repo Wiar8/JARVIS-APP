@@ -36,20 +36,29 @@ const AutoTranscribe = () => {
       recognitionInstance.continuous = true;
       recognitionInstance.interimResults = true;
       recognitionInstance.onresult = (event) => {
-        const currentTranscript = Array.from(event.results)
-          .map((result) => result[0])
-          .map((result) => result.transcript)
-          .join("");
-        setTranscript(currentTranscript);
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        // Actualiza el estado solo con el transcript final para evitar duplicados
+        setTranscript(finalTranscript);
+
         if (
-          currentTranscript.toLowerCase().includes("por favor") &&
+          finalTranscript.toLowerCase().includes("por favor") &&
           !messageSentRef.current
         ) {
           recognitionInstance.stop();
-          messageSentRef.current = true; // Actualizamos la referencia para evitar envíos repetidos
+          messageSentRef.current = true;
           setTimeout(() => {
-            wsInstance.send(currentTranscript);
-            messageSentRef.current = false; // Restablecemos la referencia después de enviar
+            wsInstance.send(finalTranscript);
+            messageSentRef.current = false;
           }, 2000);
         }
       };
