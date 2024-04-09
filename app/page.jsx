@@ -26,6 +26,8 @@ export default function Home() {
           Pregunta lo que quieras y yo te ayudaré. Solo di la palabra Jarvis y
           te respondere
         </p>
+
+        <button>Iniciar :)</button>
       </div>
       <div>
         <AutoTranscribe />
